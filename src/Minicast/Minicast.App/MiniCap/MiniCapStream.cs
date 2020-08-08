@@ -8,32 +8,32 @@ using System.Threading;
 namespace Minicast.App.MiniCap
 {
     /// <summary>
-    /// 设备屏幕流.
+    /// stream of device's screeen.
     /// </summary>
     public class MiniCapStream
     {
         /// <summary>
-        /// socket 连接.
+        /// Socket connection.
         /// </summary>
         private readonly Socket _socket;
 
         /// <summary>
-        /// 数据块.
+        /// Data chunk.
         /// </summary>
         private readonly byte[] _chunk;
 
         /// <summary>
-        /// 设备 IP.
+        /// Device IP.
         /// </summary>
         public string IP { get; set; }
 
         /// <summary>
-        /// 转发端口.
+        /// Forward port.
         /// </summary>
         public int Port { get; set; }
 
         /// <summary>
-        /// 更新事件.
+        /// Update event.
         /// </summary>
         public event Action Update;
 
@@ -50,12 +50,12 @@ namespace Minicast.App.MiniCap
         }
 
         /// <summary>
-        /// 用于提取byte数组
+        /// Extract sub-array of the byte array.
         /// </summary>
-        /// <param name="bytes">源数组</param>
-        /// <param name="start">起始位置</param>
-        /// <param name="end">结束位置</param>
-        /// <returns>提取后的数组</returns>
+        /// <param name="bytes">Original array.</param>
+        /// <param name="start">Start position.</param>
+        /// <param name="end">End position.</param>
+        /// <returns>the sub-array of the byte array.</returns>
         private static byte[] SubByteArray(byte[] bytes, int start, int end)
         {
             var len       = end - start;
@@ -69,6 +69,10 @@ namespace Minicast.App.MiniCap
 
         public MiniCapBanner Banner { get; }
 
+        /// <summary>
+        /// Read image from stream.
+        /// </summary>
+        /// <param name="token">The cancellation token.</param>
         public void ReadImageStream(CancellationToken token)
         {
             var readBannerBytes = 0;
@@ -83,7 +87,7 @@ namespace Minicast.App.MiniCap
             {
                 for (int cursor = 0, len = realLength; cursor < len;)
                 {
-                    //读取banner信息
+                    // Read the banner info.
                     if (readBannerBytes < bannerLength)
                     {
                         switch (readBannerBytes)
@@ -144,7 +148,7 @@ namespace Minicast.App.MiniCap
                         cursor          += 1;
                         readBannerBytes += 1;
                     }
-                    //读取每张图片的头4个字节(图片大小)
+                    // Read the length of the image. The first four bytes is the length.
                     else if (readFrameBytes < 4)
                     {
                         frameBodyLength += (_chunk[cursor] << (readFrameBytes * 8));
@@ -153,7 +157,7 @@ namespace Minicast.App.MiniCap
                     }
                     else
                     {
-                        //读取图片内容
+                        // Read the image content.
                         if (len - cursor >= frameBodyLength)
                         {
                             frameBody = frameBody.Concat(SubByteArray(_chunk, cursor, cursor + frameBodyLength))
@@ -176,19 +180,19 @@ namespace Minicast.App.MiniCap
         }
 
         /// <summary>
-        /// 写入图片流到队列，并通知监听器更新对象
+        /// Writhe the image stream to the queue and notify the listener to update.
         /// </summary>
-        /// <param name="frameBody">帧体</param>
+        /// <param name="frameBody">The frame body.</param>
         public void AddStream(byte[] frameBody)
         {
             ImageByteQueue.Enqueue(frameBody);
 
-            // 使用事件来通知给订阅者
+            // Notify subscribers.
             Update?.Invoke();
         }
 
         /// <summary>
-        /// 关闭 minicap.
+        /// Close minicap.
         /// </summary>
         public void Close()
         {
