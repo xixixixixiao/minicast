@@ -61,6 +61,10 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="MiniCap\MiniCapBanner.cs" />
+    <Compile Include="MiniCap\MiniCapStream.cs" />
+    <Compile Include="MiniTouch\MiniTouchBanner.cs" />
+    <Compile Include="MiniTouch\MiniTouchStream.cs" />
     <Compile Include="Views\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
